@@ -283,3 +283,120 @@
   ```
 * <span id="model_establishment">**模型建立**</span>:<br>
   我們使用CNN LSTM模型來作為預測模型，我們提供兩種方法創建模型，使用兩種不同方法建立模型，來比較不同方法創建的模型好壞，ConvLSTM2D方法創建的模型是CNN、LSTM一起建立，且需要回傳序列(return_sequences=True)，多了時間序列變成4維，需要用MaxPooling3D；LRCN方法創建模型用TimeDistribute來使CNN模型可以加到LSTM模型一起使用，使用Conv2D方法只有CNN模型，並沒有時間序列，之後才加入LSTM。參數如下表:
+  | Model         | CNN\_LSTM                                                                                         | LRCN                                                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Architecture  | Sequential                                                                                        | Sequential                                                                                                    |
+| First Layer   | ConvLSTM2D:
+
+filters = 8,
+
+kernel\_size = (5, 5)
+
+activation = “relu”,
+
+return\_sequences = True  | TimeDistributed:
+
+Conv2D:
+
+filters = 8,
+
+kernel\_size = (5, 5),
+
+padding = “same”,
+
+activation = “relu”
+
+<br> |
+| Second Layer  | MaxPooling3D:
+
+pool\_size = (1, 2, 2),
+
+padding = “same”                                          | TimeDistributed:
+
+MaxPooling2D:
+
+pool\_size = (4, 4),
+
+padding=“valid”                                        |
+| Third Layer   | ConvLSTM2D:
+
+filters = 16,
+
+kernel\_size = (3, 3)
+
+activation = “relu”,
+
+return\_sequences = True | TimeDistributed:
+
+Dropout(0.25)                                                                               |
+| Fourth Layer  | MaxPooling3D:
+
+pool\_size = (1, 2, 2),
+
+padding = “same”                                          | TimeDistributed:
+
+Conv2D:
+
+filters = 16,
+
+kernel\_size = (3, 3),
+
+padding = “same”,
+
+activation = “relu”      |
+| Fifth Layer   | TimeDistributed:
+
+Dropout(0.2)                                                                    | TimeDistributed:
+
+MaxPooling2D:
+
+pool\_size = (4, 4),
+
+padding='valid'                                        |
+| Sixth Layer   | ConvLSTM2D:
+
+filters = 32,
+
+kernel\_size = (3, 3)
+
+activation = “relu”,
+
+return\_sequences = True | TimeDistributed:
+
+Conv2D:
+
+filters = 32,
+
+kernel\_size = (3, 3),
+
+padding = “same”,
+
+activation = “relu”      |
+| Seventh Layer | MaxPooling3D:
+
+pool\_size = (1, 2, 2),
+
+padding = “same”                                          | TimeDistributed:
+
+MaxPooling2D:
+
+pool\_size = (2, 2),
+
+padding='valid'                                        |
+| Eighth Layer  | Flatten                                                                                           | TimeDistributed:
+
+Flatten                                                                                     |
+| Ninth Layer   | Dense:
+
+units= length of classes number,
+
+activation = “softmax”                                  | LSTM:
+
+units = 32,
+
+activation = “relu”                                                                       |
+| Tenth Layer   |                                                                                                   | Dense:
+
+units= length of classes number,
+
+activation = “softmax”                                              |
