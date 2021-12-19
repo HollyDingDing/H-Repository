@@ -7,7 +7,6 @@
   <a href="#grab_frames">Collect Frame Datas</a><br>
   <a href="#model_establishment">Model Configuration</a><br>
 
-<p backgound-color="gray">Model Configuration</p>
 
 * <span id="grab_frames">**影像資料抓取**</span>：<br>
   我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
@@ -297,3 +296,169 @@
   | Eighth Layer  | Flatten                                                                                                   | TimeDistributed:<br>Flatten                                                                                        |
   | Ninth Layer   | Dense:<br>units= length of classes number,<br>activation = “softmax”                                      | LSTM:<br>units = 32,<br>activation = “relu”                                                                        |
   | Tenth Layer   |                                                                                                           | Dense:<br>units= length of classes number,<br>activation = “softmax”                                               |
+  <br>
+
+  * Load Data From Existed Files:<br>
+    ```python
+    # 載入先前資料集數據
+    with open(f'{resources_path}/features_train.json', 'r') as f:
+      features_train = np.array(json.load(f))
+    with open(f'{resources_path}/features_test.json', 'r') as f:
+      features_test = np.array(json.load(f))
+    with open(f'{resources_path}/labels_train.json', 'r') as f:
+      labels_train = np.array(json.load(f))
+    with open(f'{resources_path}/labels_test.json', 'r') as f:
+      labels_test = np.array(json.load(f))
+    with open(f'{resources_path}/labels.json', 'r') as f:
+      labels = np.array(json.load(f))
+    with open(f'{resources_path}/video_files_train.json', 'r') as f:
+      video_files_train = json.load(f)
+    with open(f'{resources_path}/video_files_test.json', 'r') as f:
+      video_files_test = json.load(f)
+    ```
+
+    <br>
+
+  * Training:<br>
+    ```python
+    # 配置模組儲存目錄
+    modelPath = f'{path}/models'
+    if not os.path.exists(modelPath):
+      os.mkdir(modelPath)
+    print(video_files_test)
+    ```
+    <br>
+
+    * **All Steps**:<br>
+      <a href="#cnn_lstm_model">CNN LSTM MODEL</a><br>
+      <a href="#lrcn_model">Model Configuration</a><br>
+
+    * <span id="cnn_lstm_model"> ***Build CNN LSTM Model:*** </span>
+
+      ```python
+      # 創建CNN_LSTM模型函式
+      def create_convlstm_model():
+          '''
+          This function will construct the required convlstm model.
+          Returns:
+              model: It is the required constructed convlstm model.
+          '''
+
+          # We will use a Sequential model for model construction
+          model = Sequential()
+
+          # Define the Model Architecture.
+          ########################################################################################################################
+
+          model.add(ConvLSTM2D(filters = 8, kernel_size = (5, 5), activation = 'relu',data_format = "channels_last",
+                               recurrent_dropout=0.2, return_sequences=True, input_shape = (SEQUENCE_LENGTH,
+                               IMAGE_WIDTH, IMAGE_HEIGHT, 3)))
+
+          model.add(MaxPooling3D(pool_size=(1, 2, 2), padding='same', data_format='channels_last'))
+          # model.add(TimeDistributed(Dropout(0.2)))
+
+          model.add(ConvLSTM2D(filters = 16, kernel_size = (3, 3), activation = 'relu', data_format = "channels_last",
+                               recurrent_dropout=0.2, return_sequences=True))
+
+          model.add(MaxPooling3D(pool_size=(1, 2, 2), padding='same', data_format='channels_last'))
+          model.add(TimeDistributed(Dropout(0.2)))
+
+          model.add(ConvLSTM2D(filters = 32, kernel_size = (3, 3), activation = 'relu', data_format = "channels_last",
+                               recurrent_dropout=0.2, return_sequences=True))
+
+          model.add(MaxPooling3D(pool_size=(1, 2, 2), padding='same', data_format='channels_last'))
+          # model.add(TimeDistributed(Dropout(0.2)))
+
+          # model.add(ConvLSTM2D(filters = 32, kernel_size = (3, 3), activation = 'relu', data_format = "channels_last",
+          #                      recurrent_dropout=0.2, return_sequences=True))
+
+          # model.add(MaxPooling3D(pool_size=(1, 2, 2), padding='same', data_format='channels_last'))
+          #model.add(TimeDistributed(Dropout(0.2)))
+
+          model.add(Flatten())
+
+          model.add(Dense(len(CLASSES_LIST), activation = "softmax"))
+
+          ########################################################################################################################
+
+          # Display the models summary.
+          model.summary()
+
+          # Return the constructed convlstm model.
+          return model
+      ```
+      ```python
+      # 建立CNN_LSTM模型
+      convlstm_model = create_convlstm_model()
+
+      print("Model Created Successfully!")
+      ```
+      ```python
+      # 展示出模型結構
+      plot_model(convlstm_model, to_file = f'{modelPath}/convlstm_model_structure_plot.png', show_shapes = True, show_layer_names = True)
+      ```
+      ```python
+      # 建立回饋函式:可以在得到較好訓練成果後停止訓練
+      early_stopping_callback = EarlyStopping(monitor = 'val_loss', patience = 10, mode = 'min', restore_best_weights = True)
+
+      # 編譯模型並使用loss: categorical_crossentropy ，用 Adam 優化器
+      convlstm_model.compile(loss = 'categorical_crossentropy', optimizer = 'Adam', metrics = ["accuracy"])
+
+      # 開始訓練
+      convlstm_model_training_history = convlstm_model.fit(x = features_train, y = labels_train, epochs = 50, batch_size = 8,
+                                  shuffle = True, validation_split = 0.2,
+                                  callbacks = [early_stopping_callback])
+      ```
+      ```python
+      # 評估模型 accuracy、loss
+      model_evaluation_history = convlstm_model.evaluate(features_test, labels_test)
+      ```
+      ```python
+      # 將模型儲存
+      model_evaluation_loss, model_evaluation_accuracy = model_evaluation_history
+
+      # Define the string date format.
+      # Get the current Date and Time in a DateTime Object.
+      # Convert the DateTime object to string according to the style mentioned in date_time_format string.
+      date_time_format = '%Y_%m_%d__%H_%M_%S'
+      model_name = 'convlstm'
+      current_date_time_dt = dt.datetime.now()
+      current_date_time_string = dt.datetime.strftime(current_date_time_dt, date_time_format)
+
+      # Define a useful name for our model to make it easy for us while navigating through multiple saved models.
+      model_file_name = f'{modelPath}/models/{model_name}/convlstm_model___Date_Time_{current_date_time_string}___Loss_{model_evaluation_loss}___Accuracy_{model_evaluation_accuracy}3.h5'
+
+      # Save your Model.
+      convlstm_model.save(model_file_name)
+      ```
+      ```python
+      def plot_metric(model_training_history, metric_name_1, metric_name_2, plot_name):
+          '''
+          This function will plot the metrics passed to it in a graph.
+          Args:
+              model_training_history: A history object containing a record of training and validation
+                                      loss values and metrics values at successive epochs
+              metric_name_1:          The name of the first metric that needs to be plotted in the graph.
+              metric_name_2:          The name of the second metric that needs to be plotted in the graph.
+              plot_name:              The title of the graph.
+          '''
+
+          # Get metric values using metric names as identifiers.
+          metric_value_1 = model_training_history.history[metric_name_1]
+          metric_value_2 = model_training_history.history[metric_name_2]
+
+          # Construct a range object which will be used as x-axis (horizontal plane) of the graph.
+          epochs = range(len(metric_value_1))
+
+          # Plot the Graph.
+          plt.plot(epochs, metric_value_1, 'blue', label = metric_name_1)
+          plt.plot(epochs, metric_value_2, 'red', label = metric_name_2)
+
+          # Add title to the plot.
+          plt.title(str(plot_name))
+
+          # Add legend to the plot.
+          plt.legend()
+      ```
+    * <span id="lrcn_model"> ***Build LRCN Model:*** </span>
+      
