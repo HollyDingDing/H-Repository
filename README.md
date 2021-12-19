@@ -1,9 +1,10 @@
 # Laser Recognition
 ## <Laser_recognition模型製作與影像前置處理>
 #### Author: Hdingzp4  Tylerj86
-<p backgound-color="gray">Collect Frame Datas</p>
+<a href="#影像資料抓取">Collect Frame Datas</a>
+<a href="#模型建立">Model Configuration</a>
 <p backgound-color="gray">Model Configuration</p>
-* <span id="#grab_frames">**影像資料抓取**</span>：<br>
+* **影像資料抓取**：<br>
   我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
   * Run In Colab
     ```python
@@ -275,3 +276,5 @@
   with open(f'{resources_path}/video_files_test.json', 'w') as f:
     json.dump(video_files_test, f)
   ```
+* **模型建立**:<br>
+  我們使用CNN LSTM模型來作為預測模型，我們提供兩種方法創建模型，使用兩種不同方法建立模型，來比較不同方法創建的模型好壞，ConvLSTM2D方法創建的模型是CNN、LSTM一起建立，且需要回傳序列(return_sequences=True)，多了時間序列變成4維，需要用MaxPooling3D；LRCN方法創建模型用TimeDistribute來使CNN模型可以加到LSTM模型一起使用，使用Conv2D方法只有CNN模型，並沒有時間序列，之後才加入LSTM。參數如下表:
