@@ -1,9 +1,12 @@
 # Laser Recognition
 ## <Laser_recognition模型製作與影像前置處理>
 #### Author: Hdingzp4  Tylerj86
+<tr>
 
-<a href="#grab_frames">Collect Frame Datas</a><br>
-<a href="#model_establishment">Model Configuration</a><br>
+* **All Steps**:<br>
+  <a href="#grab_frames">Collect Frame Datas</a><br>
+  <a href="#model_establishment">Model Configuration</a><br>
+
 <p backgound-color="gray">Model Configuration</p>
 
 * <span id="grab_frames">**影像資料抓取**</span>：<br>
