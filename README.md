@@ -284,50 +284,16 @@
 * <span id="model_establishment">**模型建立**</span>:<br>
   我們使用CNN LSTM模型來作為預測模型，我們提供兩種方法創建模型，使用兩種不同方法建立模型，來比較不同方法創建的模型好壞，ConvLSTM2D方法創建的模型是CNN、LSTM一起建立，且需要回傳序列(return_sequences=True)，多了時間序列變成4維，需要用MaxPooling3D；LRCN方法創建模型用TimeDistribute來使CNN模型可以加到LSTM模型一起使用，使用Conv2D方法只有CNN模型，並沒有時間序列，之後才加入LSTM。參數如下表: <br>
 
-  | Model    | Architecture | First Layer                                                                                        | Second Layer                                                        | Third Layer                                                                                  | Fourth Layer                                                                                        | Fifth Layer                    | Sixth Layer | Seventh Layer | Eighth Layer |
-  |----------|--------------|----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|--------------------------------|-------------|---------------|--------------|
-  | CNN_LSTM | Sequential   | ConvLSTM2D:
-  filters = 8,
-  kernel_size = (5, 5)
-  activation = “relu”,
-  return_sequences = True
-          | MaxPooling3D:
-  pool_size = (1, 2, 2),
-  padding = “same”
-                | ConvLSTM2D:
-  filters = 16,
-  kernel_size = (3, 3)
-  activation = “relu”,
-  return_sequences = True
-   | MaxPooling3D:
-  pool_size = (1, 2, 2),
-  padding = “same”
-                                                | TimeDistributed:
-  Dropout(0.2)
-   |             |               |              |
-  | LRCN     | Sequential   | TimeDistributed:
-  Conv2D:
-  filters = 8,
-  kernel_size = (5, 5),
-  padding = “same”,
-  activation = “relu”
-   | TimeDistributed:
-  MaxPooling2D:
-  pool_size = (4, 4),
-  padding=“valid”
-   | TimeDistributed:
-  Dropout(0.25)
-                                                                | TimeDistributed:
-  Conv2D:
-  filters = 16,
-  kernel_size = (3, 3),
-  padding = “same”,
-  activation = “relu”
-   |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
-  |          |              |                                                                                                    |                                                                     |                                                                                              |                                                                                                     |                                |             |               |              |
+  | Model         | CNN\_LSTM                                                                                                 | LRCN                                                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Architecture  | Sequential                                                                                                | Sequential                                                                                                         |
+| First Layer   | ConvLSTM2D:<br>filters = 8,<br>kernel\_size = (5, 5)<br>activation = “relu”,<br>return\_sequences = True  | TimeDistributed:<br>Conv2D:<br>filters = 8,<br>kernel\_size = (5, 5),<br>padding = “same”,<br>activation = “relu”  |
+| Second Layer  | MaxPooling3D:<br>pool\_size = (1, 2, 2),<br>padding = “same”                                              | TimeDistributed:<br>MaxPooling2D:<br>pool\_size = (4, 4),<br>padding=“valid”                                       |
+| Third Layer   | ConvLSTM2D:<br>filters = 16,<br>kernel\_size = (3, 3)<br>activation = “relu”,<br>return\_sequences = True | TimeDistributed:<br>Dropout(0.25)                                                                                  |
+| Fourth Layer  | MaxPooling3D:<br>pool\_size = (1, 2, 2),<br>padding = “same”                                              | TimeDistributed:<br>Conv2D:<br>filters = 16,<br>kernel\_size = (3, 3),<br>padding = “same”,<br>activation = “relu” |
+| Fifth Layer   | TimeDistributed:<br>Dropout(0.2)                                                                          | TimeDistributed:<br>MaxPooling2D:<br>pool\_size = (4, 4),<br>padding='valid'                                       |
+| Sixth Layer   | ConvLSTM2D:<br>filters = 32,<br>kernel\_size = (3, 3)<br>activation = “relu”,<br>return\_sequences = True | TimeDistributed:<br>Conv2D:<br>filters = 32,<br>kernel\_size = (3, 3),<br>padding = “same”,<br>activation = “relu” |
+| Seventh Layer | MaxPooling3D:<br>pool\_size = (1, 2, 2),<br>padding = “same”                                              | TimeDistributed:<br>MaxPooling2D:<br>pool\_size = (2, 2),<br>padding='valid'                                       |
+| Eighth Layer  | Flatten                                                                                                   | TimeDistributed:<br>Flatten                                                                                        |
+| Ninth Layer   | Dense:<br>units= length of classes number,<br>activation = “softmax”                                      | LSTM:<br>units = 32,<br>activation = “relu”                                                                        |
+| Tenth Layer   |                                                                                                           | Dense:<br>units= length of classes number,<br>activation = “softmax”                                               |
