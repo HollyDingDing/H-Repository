@@ -1,9 +1,11 @@
 # Laser Recognition
 ## <Laser_recognition模型製作與影像前置處理>
 #### Author: Hdingzp4  Tylerj86
+
 <a href="#影像資料抓取">Collect Frame Datas</a>
 <a href="#模型建立">Model Configuration</a>
 <p backgound-color="gray">Model Configuration</p>
+
 * **影像資料抓取**：<br>
   我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
   * Run In Colab
