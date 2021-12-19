@@ -2,46 +2,46 @@
 ## <Laser_recognition模型製作與影像前置處理>
 #### Author: Hdingzp4  Tylerj86
 * **影像資料抓取**：
-
-我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
+  我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
   * Run In Colab
-  ```python
-  # Colab 掛載 google drive /content/gdrive 目錄
-  from google.colab import drive
-  drive.mount('/content/gdrive')
-  ```
-  ```python
-  # 導入 PyDrive 和相關程式庫
-  from pydrive.auth import GoogleAuth
-  from pydrive.drive import GoogleDrive
-  from google.colab import auth
-  from oauth2client.client import GoogleCredentials
-  import os
+    ```python
+    # Colab 掛載 google drive /content/gdrive 目錄
+    from google.colab import drive
+    drive.mount('/content/gdrive')
+    ```
+    ```python
+    # 導入 PyDrive 和相關程式庫
+    from pydrive.auth import GoogleAuth
+    from pydrive.drive import GoogleDrive
+    from google.colab import auth
+    from oauth2client.client import GoogleCredentials
+    import os
 
-  # 驗證並創建 PyDrive 客戶端
-  auth.authenticate_user()
-  gauth = GoogleAuth()
-  gauth.credentials = GoogleCredentials.get_application_default()
-  drive = GoogleDrive(gauth)
-  ```
-  ```python
-  # 取得資料目錄
-  path = '/content/gdrive/MyDrive/laserRecognition/字母辨識/1sec_video/'
-  resources_path = f'{path}/Resources/'
-  videos = os.listdir(path)
-  print(videos)
-  ```
+    # 驗證並創建 PyDrive 客戶端
+    auth.authenticate_user()
+    gauth = GoogleAuth()
+    gauth.credentials = GoogleCredentials.get_application_default()
+    drive = GoogleDrive(gauth)
+    ```
+    ```python
+    # 取得資料目錄
+    path = '/content/gdrive/MyDrive/laserRecognition/字母辨識/1sec_video/'
+    resources_path = f'{path}/Resources/'
+    videos = os.listdir(path)
+    print(videos)
+    ```
   * Run In Jupyter
-  ```python
-  import os
-  ```
-  ```python
-  # 取得資料目錄
-  path = '/1sec_video/'
-  resources_path = f'{path}/Resources/'
-  videos = os.listdir(path)
-  print(videos)
-  ```
+    ```python
+    import os
+    ```
+    ```python
+    # 取得資料目錄
+    path = '/1sec_video/'
+    resources_path = f'{path}/Resources/'
+    videos = os.listdir(path)
+    print(videos)
+    ```
+
 ```python
 # 取得所有資料類別
 classes_num = 0
