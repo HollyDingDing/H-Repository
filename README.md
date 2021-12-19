@@ -1,8 +1,9 @@
 # Laser Recognition
 ## <Laser_recognition模型製作與影像前置處理>
 #### Author: Hdingzp4  Tylerj86
-
-* **影像資料抓取**：<br>
+<p backgound-color="gray">Collect Frame Datas</p>
+<p backgound-color="gray">Model Configuration</p>
+* <span id="#grab_frames">**影像資料抓取**</span>：<br>
   我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
   * Run In Colab
     ```python
@@ -86,6 +87,12 @@
   from tensorflow.keras.callbacks import EarlyStopping
   from tensorflow.keras.utils import plot_model
   ```
+  ```python
+  seed_constant = 25
+  np.random.seed(seed_constant)
+  random.seed(seed_constant)
+  tf.random.set_seed(seed_constant)
+  ```
   為符合CNN LSTM模型所需訓練的格式，首先我們利用opencv-python模組進行影片的前置處理。
   我們建立了名為Video_process_tool的Class以利處理影像，於其中建立了get_mask resize_img及gray_img三種函式。
   * get_mask:<br>
@@ -95,6 +102,16 @@
   * gray_img:<br>
     利用opencv的cv2.cvtColor模組先將圖片轉成灰階。
     建立frames_extraction函式，使用cv2抓取檔案中的影像，檢測影片抓取的幀數，加以切割並分配長度設定為15幀的影像。再將影像經前述的Video_proccess_tool處理後，對於每個pixel除以255，也就是使其成為介於0到1之間的數值，以方便後續進行卷積或是運算，最後將每幀圖片加入陣列中回。
+  ```python
+  # 配置模型的儲存位置、已有模組檔案
+  cnnlstm_name = 'cnnlstm'
+  cnnlstm_path = f'{resources_path}/models/{cnnlstm_name}'
+  cnnlstm_file = os.listdir(cnnlstm_path)
+
+  lrcn_name = 'lrcn'
+  lrcn_path = f'{resources_path}/models/{lrcn_name}'
+  lrcn_file = os.listdir(lrcn_path)
+  ```
   ```python
   # 影像處理工具
   class Video_process_tool:
@@ -226,5 +243,35 @@
       # Return the frames, class index, and video file path.
       return features, labels, video_files_paths
   ```
+  ```python
+  # 調用創建資料集功能
+  features, labels, video_files_paths = create_dataset()
+  ```
+  ```python
+  # 用 Keras 的 to_categorical 方法把所有類別標籤轉為 one-hot-encoded 向量
+  one_hot_encoded_labels = to_categorical(labels)
+  print(one_hot_encoded_labels)
+  ```
   使用sklearn對處理好的features和Labels，進行拆分，分成features_train(用於訓練的資料), features_test(用於測試的資料), labels_train(用於訓練的標籤), labels_test(用於測試的標籤), video_files_train(訓練的影片檔案位置), video_files_test(測式的影片檔案位置)。
   利用json將檔案dump至指定的json檔案位置，也就是將要使用的database，接著就可進入模型訓練的階段，只需再將json檔案載入就行了。
+  ```python
+  # 將資料集拆分為訓練和測試資料集
+  features_train, features_test, labels_train, labels_test, video_files_train, video_files_test = train_test_split(features, one_hot_encoded_labels, video_files_paths, random_state = seed_constant, train_size=0.8)
+  ```
+  ```python
+  # 把訓練、測試資料用JSON格式寫入檔案中
+  with open(f'{resources_path}/features_train.json', 'w') as f:
+    json.dump(features_train.tolist(), f)
+  with open(f'{resources_path}/features_test.json', 'w') as f:
+    json.dump(features_test.tolist(), f)
+  with open(f'{resources_path}/labels_train.json', 'w') as f:
+    json.dump(labels_train.tolist(), f)
+  with open(f'{resources_path}/labels_test.json', 'w') as f:
+    json.dump(labels_test.tolist(), f)
+  with open(f'{resources_path}/labels.json', 'w') as f:
+    json.dump(labels.tolist(), f)
+  with open(f'{resources_path}/video_files_train.json', 'w') as f:
+    json.dump(video_files_train, f)
+  with open(f'{resources_path}/video_files_test.json', 'w') as f:
+    json.dump(video_files_test, f)
+  ```
