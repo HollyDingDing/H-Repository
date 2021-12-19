@@ -1,8 +1,30 @@
 # Laser Recognition
 ## <Laser_recognition模型製作與影像前置處理>
 #### Author: Hdingzp4  Tylerj86
-* 影像資料抓取：
-我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab掛載至雲端硬碟上以取得data並利於建立database。
+* **影像資料抓取**：
+
+我們的影像檔案都優先存儲於雲端硬碟中的1sec_video資料夾中，由於是使用colab進行編寫，我們引入google.colab.drive將colab
+```python
+# Colab 掛載 google drive /content/gdrive 目錄
+from google.colab import drive
+drive.mount('/content/gdrive')
+```
+導入模組
+```python
+# 導入 PyDrive 和相關程式庫
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+from google.colab import auth
+from oauth2client.client import GoogleCredentials
+import os
+
+# 驗證並創建 PyDrive 客戶端
+auth.authenticate_user()
+gauth = GoogleAuth()
+gauth.credentials = GoogleCredentials.get_application_default()
+drive = GoogleDrive(gauth)
+```
+掛載至雲端硬碟上以取得data並利於建立database。
 為符合CNN LSTM模型所需訓練的格式，首先我們利用opencv-python模組進行影片的前置處理。
 我們建立了名為Video_process_tool的Class以利處理影像，於其中建立了get_mask resize_img及gray_img三種函式。
 get_mask:
