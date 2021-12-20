@@ -572,7 +572,7 @@
       plot_metric(LRCN_model_training_history, 'accuracy', 'val_accuracy', 'Total Accuracy vs Total Validation Accuracy')
       ```
 
-  * <span id="model_prediction"> **Model Prediction:** </span
+  * <span id="model_prediction"> **Model Prediction:** </span>
 
       ```python
       cnnlstm = tf.keras.models.load_model(f'{cnnlstm_path}/{cnnlstm_file[0]}')
